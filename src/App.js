@@ -9,7 +9,7 @@ function App() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
 
-  const drawRect = (detections, canvas) => {
+  const draw = (detections, canvas) => {
     detections.forEach((prediction) => {
       const [x, y, width, height] = prediction.bbox;
 
@@ -50,7 +50,7 @@ function App() {
       const detectData = await net.detect(video);
 
       const canvas = canvasRef.current.getContext('2d');
-      drawRect(detectData, canvas);
+      draw(detectData, canvas);
     }
   };
 
