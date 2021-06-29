@@ -5,6 +5,9 @@ import Webcam from 'react-webcam';
 
 import './App.css';
 
+const videoWidth = 640;
+const videoHeight = 480;
+
 function App() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
@@ -12,18 +15,15 @@ function App() {
   const draw = (detections, canvas) => {
     detections.forEach((prediction) => {
       const [x, y, width, height] = prediction.bbox;
-
-      // eslint-disable-next-line semi
-      const borderColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`
+      const borderColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
 
       // eslint-disable-next-line no-param-reassign
       canvas.strokeStyle = borderColor;
       // eslint-disable-next-line no-param-reassign
-      canvas.font = '18px Arial';
-
-      canvas.beginPath();
-      // eslint-disable-next-line no-param-reassign
       canvas.fillStyle = borderColor;
+      // eslint-disable-next-line no-param-reassign
+      canvas.font = '18px Arial';
+      canvas.beginPath();
       canvas.fillText(prediction.class, x, y);
       canvas.rect(x, y, width, height);
       canvas.stroke();
@@ -31,25 +31,18 @@ function App() {
   };
 
   const detect = async (net) => {
-    // eslint-disable-next-line semi
-    const camInfo = webcamRef.current
+    const camInfo = webcamRef.current;
+    const canvas = canvasRef.current.getContext('2d');
     if (
       typeof camInfo !== 'undefined'
-      && camInfo !== null
-      && camInfo.video.readyState === 4
+      && (camInfo && camInfo.video && camInfo.video.readyState === 4)
     ) {
-      const { video } = camInfo;
-      const { videoWidth, videoHeight } = video;
-
       webcamRef.current.video.width = videoWidth;
       webcamRef.current.video.height = videoHeight;
+      const detectData = await net.detect(camInfo.video);
 
       canvasRef.current.width = videoWidth;
       canvasRef.current.height = videoHeight;
-
-      const detectData = await net.detect(video);
-
-      const canvas = canvasRef.current.getContext('2d');
       draw(detectData, canvas);
     }
   };
@@ -77,8 +70,8 @@ function App() {
             right: 0,
             textAlign: 'center',
             zindex: 9,
-            width: 640,
-            height: 480,
+            width: videoWidth,
+            height: videoHeight,
           }}
         />
 
@@ -92,8 +85,8 @@ function App() {
             right: 0,
             textAlign: 'center',
             zindex: 8,
-            width: 640,
-            height: 480,
+            width: videoWidth,
+            height: videoHeight,
           }}
         />
       </header>
