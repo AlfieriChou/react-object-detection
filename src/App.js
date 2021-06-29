@@ -9,32 +9,37 @@ function App() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
 
-  const drawRect = (detections, ctx) => {
+  const drawRect = (detections, canvas) => {
     detections.forEach((prediction) => {
       const [x, y, width, height] = prediction.bbox;
-      const text = prediction.class;
 
-      const color = Math.floor(Math.random() * 16777215).toString(16);
-      ctx.strokeStyle = `#${color}`;
-      ctx.font = '18px Arial';
+      // eslint-disable-next-line semi
+      const borderColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`
 
-      ctx.beginPath();
-      ctx.fillStyle = `#${color}`;
-      ctx.fillText(text, x, y);
-      ctx.rect(x, y, width, height);
-      ctx.stroke();
+      // eslint-disable-next-line no-param-reassign
+      canvas.strokeStyle = borderColor;
+      // eslint-disable-next-line no-param-reassign
+      canvas.font = '18px Arial';
+
+      canvas.beginPath();
+      // eslint-disable-next-line no-param-reassign
+      canvas.fillStyle = borderColor;
+      canvas.fillText(prediction.class, x, y);
+      canvas.rect(x, y, width, height);
+      canvas.stroke();
     });
   };
 
   const detect = async (net) => {
+    // eslint-disable-next-line semi
+    const camInfo = webcamRef.current
     if (
-      typeof webcamRef.current !== 'undefined'
-      && webcamRef.current !== null
-      && webcamRef.current.video.readyState === 4
+      typeof camInfo !== 'undefined'
+      && camInfo !== null
+      && camInfo.video.readyState === 4
     ) {
-      const { video } = webcamRef.current;
-      const { videoWidth } = webcamRef.current.video;
-      const { videoHeight } = webcamRef.current.video;
+      const { video } = camInfo;
+      const { videoWidth, videoHeight } = video;
 
       webcamRef.current.video.width = videoWidth;
       webcamRef.current.video.height = videoHeight;
@@ -44,14 +49,13 @@ function App() {
 
       const detectData = await net.detect(video);
 
-      const ctx = canvasRef.current.getContext('2d');
-      drawRect(detectData, ctx);
+      const canvas = canvasRef.current.getContext('2d');
+      drawRect(detectData, canvas);
     }
   };
 
   const runCoco = async () => {
     const net = await cocoSsd.load();
-    // console.log('Hand pose model loaded.');
     setInterval(() => {
       detect(net);
     }, 100);
