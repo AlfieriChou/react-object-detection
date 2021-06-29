@@ -1,0 +1,4 @@
+node_modules
+.github
+__tests__
+**/**/*.test.{js,ts}
